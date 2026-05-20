@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wilmott QF 11 &mdash; Fixed-income Products, Yield and Swaps</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0a0a; --bg-card: #0d1117; --bg-code: #161b22;
+            --text-primary: #e6edf3; --text-secondary: #8b949e;
+            --accent: #fbbf24; --accent-dim: #fbbf2444; --accent-glow: #fbbf2433;
+            --accent-2: #f472b6; --accent-3: #a78bfa; --accent-4: #34d399;
+            --accent-5: #60a5fa;
+            --border: #21262d;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+            --font-body: 'Inter', sans-serif;
+            --max-width: 900px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-body); font-size: 17px; line-height: 1.7; overflow-x: hidden; }
+        .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem 1.5rem; text-align: center; position: relative; }
+        .hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 700px; height: 600px; background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+        .hero > * { position: relative; z-index: 1; }
+        .series-label { font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1rem; }
+        .hero h1 { font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 700; color: var(--text-primary); line-height: 1.2; margin-bottom: 1rem; }
+        .hero h1 .accent { color: var(--accent); }
+        .hero .subtitle { font-size: 1.1rem; color: var(--text-secondary); max-width: 640px; margin-bottom: 2rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 2.5rem; }
+        .tag { font-family: var(--font-mono); font-size: 0.75rem; padding: 0.25rem 0.75rem; border-radius: 999px; border: 1px solid var(--accent); color: var(--accent); background: var(--accent-dim); white-space: nowrap; }
+        .pipeline { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.25rem; margin-bottom: 1rem; max-width: var(--max-width); }
+        .pipeline-step { font-family: var(--font-mono); font-size: 0.7rem; padding: 0.3rem 0.7rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; color: var(--text-secondary); white-space: nowrap; }
+        .pipeline-arrow { color: var(--accent); font-size: 0.9rem; font-weight: 700; }
+        .slide { min-height: 100vh; max-width: var(--max-width); margin: 0 auto; padding: 4rem 1.5rem; position: relative; display: flex; flex-direction: column; justify-content: center; }
+        .slide-number { font-family: var(--font-display); font-size: 5rem; font-weight: 700; color: var(--accent-dim); position: absolute; top: 2rem; right: 1.5rem; line-height: 1; user-select: none; }
+        .slide h2 { font-family: var(--font-display); font-size: 1.9rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; line-height: 1.25; }
+        .slide h3 { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.75rem; }
+        .slide p { margin-bottom: 1rem; color: var(--text-secondary); }
+        .slide p strong { color: var(--text-primary); }
+        .slide ul, .slide ol { margin-bottom: 1rem; padding-left: 1.5rem; color: var(--text-secondary); }
+        .slide li { margin-bottom: 0.4rem; }
+        .slide li strong { color: var(--text-primary); }
+        .slide code { background: var(--bg-code); padding: 0.1rem 0.35rem; border-radius: 3px; font-family: var(--font-mono); font-size: 0.85em; color: var(--accent); }
+        .diagram-grid { display: grid; gap: 0.75rem; margin: 1.5rem 0; padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; }
+        .diagram-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+        .diagram-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+        .diagram-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+        .diagram-panel { padding: 1rem; background: var(--bg-code); border: 1px solid var(--border); border-radius: 6px; }
+        .diagram-panel.accent-border { border-left: 3px solid var(--accent); }
+        .diagram-panel.r { border-left: 3px solid var(--accent-2); }
+        .diagram-panel.p { border-left: 3px solid var(--accent-3); }
+        .diagram-panel.g { border-left: 3px solid var(--accent-4); }
+        .diagram-panel.b { border-left: 3px solid var(--accent-5); }
+        .diagram-panel h4 { font-family: var(--font-display); font-size: 1rem; color: var(--accent); margin-bottom: 0.5rem; }
+        .diagram-panel.r h4 { color: var(--accent-2); }
+        .diagram-panel.p h4 { color: var(--accent-3); }
+        .diagram-panel.g h4 { color: var(--accent-4); }
+        .diagram-panel.b h4 { color: var(--accent-5); }
+        .diagram-panel p, .diagram-panel ul { font-size: 0.9rem; }
+        .callout { background: var(--bg-card); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1.25rem 0; }
+        .callout p { margin-bottom: 0; }
+        .callout .callout-label { font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+        .quote { font-family: var(--font-display); font-size: 1.1rem; font-style: italic; color: var(--text-primary); padding: 1rem 1.5rem; border-left: 3px solid var(--accent); background: var(--bg-card); margin: 1.25rem 0; border-radius: 0 8px 8px 0; }
+        .quote .attr { display: block; margin-top: 0.5rem; font-style: normal; font-size: 0.85rem; color: var(--text-secondary); font-family: var(--font-mono); }
+        .canvas-wrap { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin: 1.25rem 0; overflow-x: auto; }
+        .canvas-wrap canvas, .canvas-wrap svg { display: block; margin: 0 auto; max-width: 100%; }
+        .control-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin: 1.25rem 0; }
+        .control-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+        .control-row label { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); min-width: 160px; }
+        .control-row input[type="range"] { flex: 1; min-width: 150px; accent-color: var(--accent); }
+        .control-row select, .control-row input[type="number"] { background: var(--bg-code); border: 1px solid var(--border); color: var(--text-primary); border-radius: 4px; padding: 0.3rem 0.5rem; font-family: var(--font-mono); font-size: 0.8rem; }
+        .control-row .val { font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent); min-width: 80px; text-align: right; }
+        .btn { font-family: var(--font-mono); font-size: 0.8rem; padding: 0.4rem 0.9rem; background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent); border-radius: 4px; cursor: pointer; transition: background 0.15s ease; }
+        .btn:hover { background: rgba(251,191,36,0.25); }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn.secondary { background: var(--bg-code); color: var(--text-secondary); border-color: var(--border); }
+        .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.5rem; margin-top: 0.75rem; }
+        .metric { background: var(--bg-code); border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem 0.8rem; text-align: center; }
+        .metric .metric-label { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; }
+        .metric .metric-value { font-family: var(--font-display); font-size: 1.25rem; color: var(--accent); font-weight: 600; margin-top: 0.2rem; }
+        .contents-list { list-style: none; padding-left: 0; counter-reset: contents; }
+        .contents-list li { counter-increment: contents; padding: 0.6rem 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; }
+        .contents-list li:last-child { border-bottom: none; }
+        .contents-list li::before { content: counter(contents, decimal-leading-zero); font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent); min-width: 2rem; }
+        .contents-list a { color: var(--text-primary); text-decoration: none; }
+        .contents-list a:hover { color: var(--accent); }
+        .footer { text-align: center; padding: 3rem 1.5rem; color: var(--text-secondary); font-size: 0.85rem; border-top: 1px solid var(--border); max-width: var(--max-width); margin: 0 auto; }
+        .footer a { color: var(--accent); text-decoration: none; }
+        .katex { color: var(--text-primary); }
+        .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 1rem 0; }
+        th { background: var(--bg-code); color: var(--accent); font-weight: 600; text-align: left; padding: 0.6rem 0.85rem; border-bottom: 1px solid var(--border); font-family: var(--font-display); }
+        td { padding: 0.5rem 0.85rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: top; }
+        tr:last-child td { border-bottom: none; }
+        tr:nth-child(even) td { background: rgba(13, 17, 23, 0.5); }
+        @media (max-width: 640px) {
+            .slide { padding: 3rem 1rem; min-height: auto; }
+            .slide-number { font-size: 3rem; top: 1.5rem; right: 1rem; }
+            .slide h2 { font-size: 1.5rem; }
+            .diagram-grid.cols-2, .diagram-grid.cols-3, .diagram-grid.cols-4 { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="hero">
+    <div class="series-label">Paul Wilmott Introduces Quantitative Finance &mdash; Deck 11</div>
+    <h1>Fixed-income Products, Yield and <span class="accent">Swaps</span></h1>
+    <p class="subtitle">Bonds, the yield curve, duration and convexity, bootstrapping, and the workhorse of fixed-income desks &mdash; the vanilla interest-rate swap.</p>
+
+    <div class="tags">
+        <span class="tag">zero-coupon</span><span class="tag">coupon bond</span>
+        <span class="tag">yield</span><span class="tag">duration</span>
+        <span class="tag">convexity</span><span class="tag">bootstrap</span>
+        <span class="tag">FRA</span><span class="tag">swap</span>
+    </div>
+
+    <div class="pipeline">
+        <span class="pipeline-step">cashflows $C_i$</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">discount $e^{-y t_i}$</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">price $B$</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">$D, C$ sensitivities</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">swap curve</span>
+    </div>
+</header>
+
+<section class="slide" id="slide-00">
+    <div class="slide-number">00</div>
+    <h2>Topics We'll Cover</h2>
+    <ul class="contents-list">
+        <li><a href="#slide-01">Zero-coupon and coupon bonds; STRIPS</a></li>
+        <li><a href="#slide-02">FRAs and repos</a></li>
+        <li><a href="#slide-03">Day-count conventions and accrued interest</a></li>
+        <li><a href="#slide-04">Yield: continuous vs. discrete</a></li>
+        <li><a href="#slide-05">The yield curve: spot, forward and par</a></li>
+        <li><a href="#slide-06">Duration &mdash; Macaulay and modified</a></li>
+        <li><a href="#slide-07">Convexity and the second-order correction</a></li>
+        <li><a href="#slide-08">Bootstrapping the yield curve</a></li>
+        <li><a href="#slide-09">Vanilla interest-rate swaps</a></li>
+        <li><a href="#slide-10">Interactive: bond yield, duration &amp; convexity</a></li>
+    </ul>
+</section>
+
+<section class="slide" id="slide-01">
+    <div class="slide-number">01</div>
+    <h2>Zero-coupon and Coupon Bonds; STRIPS</h2>
+    <p>A <strong>zero-coupon bond</strong> is the simplest fixed-income instrument: it pays a single unit at maturity $T$ and nothing in between. Its price today, under a flat continuously compounded rate $r$, is</p>
+    <p>$$Z(t, T) = e^{-r(T-t)}.$$</p>
+
+    <p>A <strong>coupon bond</strong> pays a stream of coupons $C$ at dates $t_i$ together with the face value $F$ at maturity. It is just a portfolio of zeros:</p>
+    <p>$$B = \sum_{i=1}^{N-1} C\, Z(t,t_i) + (C + F)\, Z(t, t_N).$$</p>
+
+    <div class="diagram-grid cols-3">
+        <div class="diagram-panel accent-border">
+            <h4>Money-market account</h4>
+            <p>The riskless rolling account $M_t$ growing at the short rate $r_t$:</p>
+            <p>$$dM = r_t M\, dt, \quad M_0 = 1.$$</p>
+            <p>The numeraire of choice for risk-neutral pricing.</p>
+        </div>
+        <div class="diagram-panel p">
+            <h4>STRIPS</h4>
+            <p>Separate Trading of Registered Interest and Principal &mdash; a coupon bond is split into its component zeros and they trade individually. Lets the market read off the discount curve directly.</p>
+        </div>
+        <div class="diagram-panel g">
+            <h4>Yield to maturity</h4>
+            <p>A single rate $y$ that, when used to discount all cashflows, reproduces the market price:</p>
+            <p>$$B = \sum_i C_i\, e^{-y t_i}.$$</p>
+        </div>
+    </div>
+
+    <div class="callout">
+        <div class="callout-label">Companion philosophy</div>
+        <p>This deck stays close to Wilmott's chapters 14 and 15. The interactive bond calculator on slide 10 lets you turn coupon, maturity, face value and yield knobs and watch price, duration, convexity and DV01 update live &mdash; the same example used in the book to motivate the Taylor expansion in $y$.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-02">
+    <div class="slide-number">02</div>
+    <h2>FRAs and Repos</h2>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel accent-border">
+            <h4>Forward Rate Agreement (FRA)</h4>
+            <p>An agreement struck at $t$ to lock in a borrowing/lending rate $K$ for the future period $[T_1, T_2]$ on notional $N$. The payoff at $T_2$ is</p>
+            <p>$$N \cdot (L - K)(T_2 - T_1),$$</p>
+            <p>where $L$ is the realised LIBOR/SOFR fixing for the period. By no-arbitrage the fair $K$ is the forward rate $f(t; T_1, T_2)$ implied by today's discount curve.</p>
+        </div>
+        <div class="diagram-panel b">
+            <h4>Repo</h4>
+            <p>A <strong>repurchase agreement</strong>: sell a bond today, agree to buy it back at a fixed price tomorrow (or in a few weeks). Economically a collateralised loan. The implied financing rate is the <em>repo rate</em>, and it's what most cash bond trades are actually funded at.</p>
+            <p><em>Reverse repo</em>: the same trade from the other side &mdash; lend cash, take collateral.</p>
+        </div>
+    </div>
+
+    <p>Both contracts are the plumbing that lets the bond and short-rate markets connect to each other. The FRA pins down forward rates; the repo pins down the financing cost of holding inventory.</p>
+
+    <div class="callout">
+        <div class="callout-label">Why this matters for pricing</div>
+        <p>Every "buy the bond and finance it" arbitrage in this chapter is, in practice, executed via the repo market. The cost-of-carry you see in the forward bond price is the repo rate, not some abstract risk-free rate.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-03">
+    <div class="slide-number">03</div>
+    <h2>Day-count Conventions and Accrued Interest</h2>
+    <p>Bonds trade <em>between</em> coupon dates. The quoted (clean) price doesn't include the coupon that's been accruing since the last payment &mdash; but the buyer still has to pay it. The <strong>dirty</strong> (invoice) price is the clean price plus the accrued interest.</p>
+
+    <p>$$P_\text{dirty} = P_\text{clean} + \text{accrued}.$$</p>
+
+    <table>
+        <thead><tr><th>Convention</th><th>Day count</th><th>Typical use</th></tr></thead>
+        <tbody>
+            <tr><td>Act/Act</td><td>actual days / actual days in coupon period</td><td>UK gilts, US Treasuries</td></tr>
+            <tr><td>Act/360</td><td>actual days / 360</td><td>USD LIBOR, money markets</td></tr>
+            <tr><td>Act/365</td><td>actual days / 365</td><td>GBP money market</td></tr>
+            <tr><td>30/360</td><td>each month treated as 30 days, year as 360</td><td>US corporate bonds</td></tr>
+        </tbody>
+    </table>
+
+    <p>It looks like book-keeping &mdash; and it is &mdash; but a mis-applied day-count convention will quietly add or subtract a few basis points from every trade you do. Quants who think this stuff is beneath them lose money.</p>
+
+    <div class="callout">
+        <div class="callout-label">Accrued interest formula</div>
+        <p>For a bond paying coupon $C$ at the end of a period of length $\tau$ days, with $d$ days elapsed since the last coupon:</p>
+        <p>$$\text{accrued} = C \cdot \frac{d}{\tau}.$$</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-04">
+    <div class="slide-number">04</div>
+    <h2>Yield: Continuous vs. Discrete</h2>
+    <p>The <strong>yield to maturity</strong> $y$ of a bond is the single rate that discounts its cashflows back to its market price. Two parallel definitions:</p>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel g">
+            <h4>Continuously compounded</h4>
+            <p>$$B = \sum_i C_i\, e^{-y\, t_i}.$$</p>
+            <p>This is the convention we use in the rest of the deck. The derivative $\partial B/\partial y$ is clean.</p>
+        </div>
+        <div class="diagram-panel p">
+            <h4>Discretely compounded</h4>
+            <p>For a bond paying $m$ coupons per year:</p>
+            <p>$$B = \sum_i \frac{C_i}{(1 + y/m)^{m\, t_i}}.$$</p>
+            <p>This is what most trading systems quote. The two yields differ by $O(y^2/m)$.</p>
+        </div>
+    </div>
+
+    <p>Given the price, $y$ is found numerically &mdash; there is no closed form except for a zero-coupon bond, where</p>
+    <p>$$y = -\frac{1}{T-t} \log\!\frac{B}{F}.$$</p>
+
+    <h3>What yield is and isn't</h3>
+    <p>Yield is just an internal-rate-of-return label for the price; it is <em>not</em> a forecast of future returns, and it is <em>not</em> the same as the discount rate $r$ that the market is using underneath if rates aren't flat. The yield curve (next slide) is the way out of this confusion.</p>
+
+    <div class="callout">
+        <div class="callout-label">Conversion</div>
+        <p>A semi-annual yield $y_2$ corresponds to a continuous yield $y_c = 2 \log(1 + y_2/2)$. At small rates the two are nearly identical; at 10% they differ by ~25 bps.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-05">
+    <div class="slide-number">05</div>
+    <h2>The Yield Curve: Spot, Forward and Par</h2>
+    <p>Three curves all describe the same underlying discount factors $Z(0, T)$.</p>
+
+    <div class="diagram-grid cols-3">
+        <div class="diagram-panel accent-border">
+            <h4>Spot rate $r(T)$</h4>
+            <p>The yield on a zero-coupon bond of maturity $T$:</p>
+            <p>$$Z(0,T) = e^{-r(T)\, T}.$$</p>
+            <p>Reading the curve straight off the STRIPS market gives you this.</p>
+        </div>
+        <div class="diagram-panel b">
+            <h4>Forward rate $f(0; T_1, T_2)$</h4>
+            <p>The rate locked in today for borrowing from $T_1$ to $T_2$:</p>
+            <p>$$f = \frac{r(T_2)T_2 - r(T_1)T_1}{T_2 - T_1}.$$</p>
+            <p>Instantaneous forward: $f(T) = -\partial \log Z / \partial T$.</p>
+        </div>
+        <div class="diagram-panel g">
+            <h4>Par rate $c^*(T)$</h4>
+            <p>The coupon rate that makes a fresh bond price exactly at par:</p>
+            <p>$$1 = c^*\!\sum_i Z(0,t_i) + Z(0,T).$$</p>
+            <p>This is what new bond issues are priced from.</p>
+        </div>
+    </div>
+
+    <p>Spot, forward, and par all carry the same information &mdash; they're three different lenses on the same set of discount factors. Trading desks prefer one or the other depending on whether they're looking at carry, hedging, or new issuance.</p>
+
+    <p>The relationship between them is exact arithmetic, not a model. Once you've bootstrapped $Z(0,T)$ for all $T$ on a regular grid, the other two curves drop out for free.</p>
+</section>
+
+<section class="slide" id="slide-06">
+    <div class="slide-number">06</div>
+    <h2>Duration &mdash; Macaulay and Modified</h2>
+    <p>The first sensitivity question a fixed-income trader asks: <em>how much does my bond price move if the yield wiggles?</em></p>
+
+    <p>The Taylor expansion of $B(y)$ around the current yield $y_0$:</p>
+    <p>$$\Delta B \approx \frac{\partial B}{\partial y}\, \Delta y + \tfrac{1}{2} \frac{\partial^2 B}{\partial y^2}\, (\Delta y)^2.$$</p>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel accent-border">
+            <h4>Macaulay duration</h4>
+            <p>A weighted average maturity, with weights given by the present value of each cashflow:</p>
+            <p>$$D_\text{Mac} = \frac{1}{B} \sum_i t_i\, C_i\, e^{-y t_i}.$$</p>
+            <p>Has units of years &mdash; a 10-year bond paying coupons has $D_\text{Mac}$ a bit less than 10.</p>
+        </div>
+        <div class="diagram-panel g">
+            <h4>Modified duration</h4>
+            <p>The price sensitivity directly:</p>
+            <p>$$D_\text{mod} = -\frac{1}{B}\, \frac{\partial B}{\partial y}.$$</p>
+            <p>For continuously compounded $y$, $D_\text{mod} = D_\text{Mac}$. For semi-annual $y_2$, $D_\text{mod} = D_\text{Mac}/(1 + y_2/2)$.</p>
+        </div>
+    </div>
+
+    <p>The headline number every trading-floor risk system displays for a bond position is <strong>DV01</strong> (or <em>PV01</em>, <em>basis point value</em>):</p>
+    <p>$$\text{DV01} = -\frac{\partial B}{\partial y} \times 10^{-4} = B \cdot D_\text{mod} \cdot 10^{-4}.$$</p>
+
+    <p>The change in price, in pounds, per one basis point (0.01%) increase in yield. A bond with $D_\text{mod} = 7$ and price &pound;100 has DV01 = &pound;0.07.</p>
+
+    <div class="callout">
+        <div class="callout-label">Why duration is "first order"</div>
+        <p>Duration captures only the linear part. For small yield moves (a few bps) it's enough; for large ones (1%+) you'll need convexity too. That's the next slide.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-07">
+    <div class="slide-number">07</div>
+    <h2>Convexity and the Second-order Correction</h2>
+    <p>The second-order term in the Taylor expansion of the bond price:</p>
+    <p>$$\frac{\Delta B}{B} \approx -D_\text{mod}\, \Delta y + \tfrac{1}{2} C\, (\Delta y)^2,$$</p>
+    <p>where convexity is</p>
+    <p>$$C = \frac{1}{B}\, \frac{\partial^2 B}{\partial y^2} = \frac{1}{B} \sum_i t_i^2\, C_i\, e^{-y t_i}.$$</p>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel p">
+            <h4>Why it's positive</h4>
+            <p>$\partial^2 B/\partial y^2$ is a sum of positive terms, so $C > 0$ for any bond with positive cashflows. Geometrically: the price-yield curve is convex, so a duration line <em>underestimates</em> the price on both sides of $y_0$.</p>
+        </div>
+        <div class="diagram-panel r">
+            <h4>"Convexity is a free lunch"</h4>
+            <p>For two bonds with the same duration, the more convex one outperforms when yields move by a lot &mdash; in either direction. This is why long-dated, low-coupon bonds (high convexity) command a premium in volatile-rate environments.</p>
+        </div>
+    </div>
+
+    <table>
+        <thead><tr><th>Bond</th><th>$D_\text{mod}$ (yr)</th><th>$C$ (yr$^2$)</th><th>$\Delta B / B$ for $\Delta y = +1\%$</th></tr></thead>
+        <tbody>
+            <tr><td>5-yr 5% coupon</td><td>4.4</td><td>22</td><td>$-4.4\% + 0.11\% \approx -4.29\%$</td></tr>
+            <tr><td>10-yr 5% coupon</td><td>7.9</td><td>76</td><td>$-7.9\% + 0.38\% \approx -7.52\%$</td></tr>
+            <tr><td>30-yr zero</td><td>30</td><td>900</td><td>$-30\% + 4.5\% \approx -25.5\%$</td></tr>
+        </tbody>
+    </table>
+
+    <p>Notice how the convexity correction grows with $(\Delta y)^2$ and with maturity squared. For the 30-year zero, ignoring it would mis-price a 100 bp move by nearly 5%.</p>
+</section>
+
+<section class="slide" id="slide-08">
+    <div class="slide-number">08</div>
+    <h2>Bootstrapping the Yield Curve</h2>
+    <p>The market gives you the prices of a handful of bonds. You want the <em>whole</em> curve of discount factors $Z(0, T)$ for every $T$. The recipe is iterative:</p>
+
+    <ol>
+        <li>Find a zero or money-market deposit for the shortest maturity $T_1$. Solve $Z(0, T_1)$ directly from its price.</li>
+        <li>For the next bond (maturity $T_2$), write its price as $\sum_i C_i Z(0, t_i) + F Z(0, T_2)$. Every $Z$ except $Z(0, T_2)$ is already known from step 1, so $Z(0, T_2)$ falls out.</li>
+        <li>Repeat for $T_3, T_4, \ldots$ working out along the curve.</li>
+    </ol>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel b">
+            <h4>The interpolation problem</h4>
+            <p>The bonds you bootstrap from are at discrete maturities. To price something in between you need to interpolate. Common choices:</p>
+            <ul>
+                <li>Linear in spot rates &mdash; simple but creates kinks in forward rates.</li>
+                <li>Cubic spline in $\log Z$ &mdash; smooth forwards.</li>
+                <li>Monotone cubic on forwards directly &mdash; the Hagan&ndash;West method, popular on swap desks.</li>
+            </ul>
+        </div>
+        <div class="diagram-panel g">
+            <h4>What it gives you</h4>
+            <p>Once $Z(0, T)$ is known on a fine grid, you can:</p>
+            <ul>
+                <li>Price any other (deterministic) cashflow stream.</li>
+                <li>Compute spot, forward and par curves.</li>
+                <li>Calibrate a short-rate model to the curve (Deck 12).</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="callout">
+        <div class="callout-label">Modern bootstrap</div>
+        <p>In practice the inputs are not bond prices but a mixed bag of deposits, futures, FRAs and swap rates. The swap curve has become the reference rather than the Treasury curve, because OIS &mdash; not Treasuries &mdash; is what dealers fund at. The mechanics are the same; the input instruments are different.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-09">
+    <div class="slide-number">09</div>
+    <h2>Vanilla Interest-rate Swaps</h2>
+    <p>A <strong>vanilla swap</strong>: party A pays a fixed rate $K$ on notional $N$, party B pays floating LIBOR/SOFR on the same notional, on the same schedule of dates $t_1, \ldots, t_n$.</p>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel accent-border">
+            <h4>The floating leg</h4>
+            <p>Pays $N \cdot L_i \cdot \tau_i$ at $t_i$, where $L_i$ is the LIBOR fixing at $t_{i-1}$. By the standard arbitrage argument, the PV of all floating coupons plus the (hypothetical) return of notional at $t_n$ equals $N$ today:</p>
+            <p>$$\text{PV}_\text{flt} = N\, [1 - Z(0, t_n)].$$</p>
+        </div>
+        <div class="diagram-panel p">
+            <h4>The fixed leg</h4>
+            <p>Pays $N \cdot K \cdot \tau_i$ at each $t_i$:</p>
+            <p>$$\text{PV}_\text{fix} = N\, K \sum_i \tau_i\, Z(0, t_i).$$</p>
+        </div>
+    </div>
+
+    <p>At inception, neither party pays the other &mdash; so the fair fixed rate is the one that makes the two legs equal in PV:</p>
+    <p>$$\boxed{\;K^* = \frac{1 - Z(0, t_n)}{\sum_i \tau_i\, Z(0, t_i)}\;}$$</p>
+
+    <p>This is the <strong>swap rate</strong>, and it is identical to the <em>par yield</em> of a bond with the same schedule. The swap curve and the par-yield curve are the same object viewed from two angles.</p>
+
+    <div class="callout">
+        <div class="callout-label">Why swaps dominate the rates market</div>
+        <p>Notional outstanding in vanilla IRS is in the hundreds of trillions of dollars &mdash; an order of magnitude larger than the cash bond market. Banks use them to manage the interest-rate risk on their loan books; corporates use them to switch between fixed and floating funding; pension funds use them to hedge their long-dated liabilities.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-10">
+    <div class="slide-number">10</div>
+    <h2>Interactive: Bond Yield, Duration &amp; Convexity</h2>
+    <p>Pick a coupon rate, maturity, face value and yield. The widget computes the dirty price, modified duration and convexity, and shows three pictures: the price-yield curve with the current point marked, the Taylor approximations (duration only vs. duration + convexity) against the true curve, and the cashflow schedule.</p>
+
+    <div class="canvas-wrap">
+        <canvas id="bond-canvas" width="860" height="320"></canvas>
+    </div>
+
+    <div class="control-panel">
+        <div class="control-row">
+            <label for="cpn-slider">Coupon rate (%)</label>
+            <input type="range" id="cpn-slider" min="0" max="12" step="0.1" value="5">
+            <span class="val" id="cpn-val">5.00%</span>
+        </div>
+        <div class="control-row">
+            <label for="mat-slider">Maturity (years)</label>
+            <input type="range" id="mat-slider" min="1" max="30" step="1" value="10">
+            <span class="val" id="mat-val">10</span>
+        </div>
+        <div class="control-row">
+            <label for="face-slider">Face value</label>
+            <input type="range" id="face-slider" min="50" max="200" step="1" value="100">
+            <span class="val" id="face-val">100</span>
+        </div>
+        <div class="control-row">
+            <label for="y-slider">Yield $y$ (%)</label>
+            <input type="range" id="y-slider" min="0.5" max="12" step="0.05" value="4">
+            <span class="val" id="y-val">4.00%</span>
+        </div>
+        <div class="metric-grid">
+            <div class="metric"><div class="metric-label">Price $B$</div><div class="metric-value" id="m-B">&mdash;</div></div>
+            <div class="metric"><div class="metric-label">Mod. duration (yr)</div><div class="metric-value" id="m-D">&mdash;</div></div>
+            <div class="metric"><div class="metric-label">Convexity (yr$^2$)</div><div class="metric-value" id="m-C">&mdash;</div></div>
+            <div class="metric"><div class="metric-label">DV01 (per &pound;100)</div><div class="metric-value" id="m-DV">&mdash;</div></div>
+        </div>
+    </div>
+
+    <p>The middle panel is the most useful: it shows how badly a pure-duration trader mis-prices large yield moves, and how much of the gap convexity closes. The cashflow chart on the right is the bond stripped back into its component zeros &mdash; literally the picture from slide 01.</p>
+</section>
+
+<footer class="footer">
+    <p>Deck 11 of the <a href="https://github.com/BrendanJamesLynskey/Wilmott_QF_Hub">Paul Wilmott Introduces Quantitative Finance &mdash; Companion Series</a>.</p>
+    <p style="margin-top: 0.6rem;">Companion to chapters 14 and 15 of <em>Paul Wilmott Introduces Quantitative Finance</em>, 2nd edition (Wiley, 2007).</p>
+</footer>
+
+<script>
+(function() {
+    const $ = id => document.getElementById(id);
+    const sCpn = $('cpn-slider'), sMat = $('mat-slider'),
+          sFace = $('face-slider'), sY = $('y-slider');
+    const vCpn = $('cpn-val'), vMat = $('mat-val'),
+          vFace = $('face-val'), vY = $('y-val');
+    const mB = $('m-B'), mD = $('m-D'), mC = $('m-C'), mDV = $('m-DV');
+    const canvas = $('bond-canvas'), ctx = canvas.getContext('2d');
+
+    function fmt(x, dp) { return x.toFixed(dp == null ? 2 : dp); }
+
+    // Bond with annual coupons; cashflow C at t=1,2,...,T-1; (C + F) at t=T
+    function cashflows(cpnRate, mat, face) {
+        const C = cpnRate * face;
+        const arr = [];
+        for (let t = 1; t < mat; t++) arr.push({ t, c: C });
+        arr.push({ t: mat, c: C + face });
+        return arr;
+    }
+    function priceAt(cfs, y) {
+        let B = 0;
+        for (const { t, c } of cfs) B += c * Math.exp(-y * t);
+        return B;
+    }
+    function durConv(cfs, y) {
+        let B = 0, num1 = 0, num2 = 0;
+        for (const { t, c } of cfs) {
+            const z = c * Math.exp(-y * t);
+            B += z; num1 += t * z; num2 += t * t * z;
+        }
+        return { B, D: num1 / B, C: num2 / B };
+    }
+
+    function draw() {
+        const cpn = +sCpn.value / 100, mat = +sMat.value,
+              face = +sFace.value, y = +sY.value / 100;
+        vCpn.textContent = fmt(+sCpn.value) + '%';
+        vMat.textContent = mat.toString();
+        vFace.textContent = fmt(face, 0);
+        vY.textContent = fmt(+sY.value) + '%';
+
+        const cfs = cashflows(cpn, mat, face);
+        const { B, D, C } = durConv(cfs, y);
+        const DV01 = B * D * 1e-4;
+
+        mB.textContent = fmt(B);
+        mD.textContent = fmt(D);
+        mC.textContent = fmt(C);
+        mDV.textContent = fmt(DV01, 4);
+
+        const W = canvas.width, H = canvas.height;
+        ctx.clearRect(0, 0, W, H);
+
+        // Three panels: price vs yield, Taylor approx, cashflows
+        const panelW = W / 3;
+        const padT = 30, padB = 36, padL = 38, padR = 12;
+
+        // --- Panel 1: price vs yield curve ---
+        (function() {
+            const x0 = 0, plotW = panelW - padL - padR, plotH = H - padT - padB;
+            const yMin = 0.005, yMax = 0.12;
+            const ys = [];
+            for (let i = 0; i <= 60; i++) ys.push(yMin + (yMax - yMin) * i / 60);
+            const Bs = ys.map(yy => priceAt(cfs, yy));
+            const bMin = Math.min(...Bs), bMax = Math.max(...Bs);
+
+            const x2px = yy => x0 + padL + (yy - yMin) / (yMax - yMin) * plotW;
+            const y2px = bb => padT + plotH - (bb - bMin) / (bMax - bMin) * plotH;
+
+            // axes
+            ctx.strokeStyle = '#21262d'; ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const yy = padT + i / 4 * plotH;
+                ctx.beginPath(); ctx.moveTo(x0 + padL, yy); ctx.lineTo(x0 + padL + plotW, yy); ctx.stroke();
+            }
+
+            // curve
+            ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ys.forEach((yy, i) => {
+                const px = x2px(yy), py = y2px(Bs[i]);
+                if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            });
+            ctx.stroke();
+
+            // current point
+            ctx.fillStyle = '#f472b6';
+            ctx.beginPath();
+            ctx.arc(x2px(y), y2px(B), 4.5, 0, 2 * Math.PI);
+            ctx.fill();
+
+            // labels
+            ctx.fillStyle = '#8b949e'; ctx.font = '11px JetBrains Mono';
+            ctx.fillText('B vs y', x0 + padL, padT - 10);
+            ctx.fillText('0.5%', x0 + padL - 5, H - 18);
+            ctx.fillText('12%', x0 + padL + plotW - 22, H - 18);
+            ctx.fillText(fmt(bMin, 0), x0 + 4, padT + plotH);
+            ctx.fillText(fmt(bMax, 0), x0 + 4, padT + 8);
+        })();
+
+        // --- Panel 2: Taylor approximations ---
+        (function() {
+            const x0 = panelW, plotW = panelW - padL - padR, plotH = H - padT - padB;
+            const dyRange = 0.03;
+            const ys = [];
+            for (let i = 0; i <= 60; i++) ys.push(y - dyRange + 2 * dyRange * i / 60);
+            const Bs = ys.map(yy => priceAt(cfs, yy));
+            const linApprox = ys.map(yy => B * (1 - D * (yy - y)));
+            const quadApprox = ys.map(yy => B * (1 - D * (yy - y) + 0.5 * C * (yy - y) * (yy - y)));
+
+            const all = [...Bs, ...linApprox, ...quadApprox];
+            const bMin = Math.min(...all), bMax = Math.max(...all);
+
+            const x2px = yy => x0 + padL + (yy - (y - dyRange)) / (2 * dyRange) * plotW;
+            const y2px = bb => padT + plotH - (bb - bMin) / (bMax - bMin) * plotH;
+
+            ctx.strokeStyle = '#21262d'; ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const yy = padT + i / 4 * plotH;
+                ctx.beginPath(); ctx.moveTo(x0 + padL, yy); ctx.lineTo(x0 + padL + plotW, yy); ctx.stroke();
+            }
+
+            // linear (duration)
+            ctx.strokeStyle = '#a78bfa'; ctx.lineWidth = 2;
+            ctx.beginPath();
+            ys.forEach((yy, i) => {
+                const px = x2px(yy), py = y2px(linApprox[i]);
+                if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            });
+            ctx.stroke();
+
+            // quadratic (duration + convexity)
+            ctx.strokeStyle = '#34d399'; ctx.lineWidth = 2;
+            ctx.setLineDash([5, 3]);
+            ctx.beginPath();
+            ys.forEach((yy, i) => {
+                const px = x2px(yy), py = y2px(quadApprox[i]);
+                if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            });
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // true
+            ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ys.forEach((yy, i) => {
+                const px = x2px(yy), py = y2px(Bs[i]);
+                if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+            });
+            ctx.stroke();
+
+            // mark current y
+            ctx.fillStyle = '#f472b6';
+            ctx.beginPath();
+            ctx.arc(x2px(y), y2px(B), 4.5, 0, 2 * Math.PI);
+            ctx.fill();
+
+            ctx.fillStyle = '#8b949e'; ctx.font = '11px JetBrains Mono';
+            ctx.fillText('Taylor in y', x0 + padL, padT - 10);
+            ctx.fillStyle = '#fbbf24'; ctx.fillText('— true', x0 + padL + 4, padT + 12);
+            ctx.fillStyle = '#a78bfa'; ctx.fillText('— D only', x0 + padL + 4, padT + 26);
+            ctx.fillStyle = '#34d399'; ctx.fillText('-- D + C', x0 + padL + 4, padT + 40);
+        })();
+
+        // --- Panel 3: cashflows ---
+        (function() {
+            const x0 = 2 * panelW, plotW = panelW - padL - padR, plotH = H - padT - padB;
+            const tMax = mat + 0.5;
+            const cMax = Math.max(...cfs.map(cf => cf.c));
+
+            const x2px = tt => x0 + padL + tt / tMax * plotW;
+            const y2px = cc => padT + plotH - cc / cMax * plotH;
+
+            ctx.strokeStyle = '#21262d'; ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const yy = padT + i / 4 * plotH;
+                ctx.beginPath(); ctx.moveTo(x0 + padL, yy); ctx.lineTo(x0 + padL + plotW, yy); ctx.stroke();
+            }
+
+            // baseline
+            ctx.strokeStyle = '#3a4252'; ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(x0 + padL, padT + plotH);
+            ctx.lineTo(x0 + padL + plotW, padT + plotH);
+            ctx.stroke();
+
+            // bars: cashflow itself (small) + PV (taller fade)
+            const barW = Math.max(2, Math.min(14, 0.7 * plotW / cfs.length));
+            cfs.forEach(({ t, c }) => {
+                const xc = x2px(t);
+                const yc = y2px(c);
+                ctx.fillStyle = '#34d399';
+                ctx.fillRect(xc - barW / 2, yc, barW, padT + plotH - yc);
+
+                const pv = c * Math.exp(-y * t);
+                const yp = y2px(pv);
+                ctx.fillStyle = '#60a5fa';
+                ctx.fillRect(xc - barW / 2 + 1, yp, barW - 2, padT + plotH - yp);
+            });
+
+            ctx.fillStyle = '#8b949e'; ctx.font = '11px JetBrains Mono';
+            ctx.fillText('Cashflows', x0 + padL, padT - 10);
+            ctx.fillStyle = '#34d399'; ctx.fillText('— face', x0 + padL + 4, padT + 12);
+            ctx.fillStyle = '#60a5fa'; ctx.fillText('— PV', x0 + padL + 4, padT + 26);
+            ctx.fillStyle = '#8b949e';
+            ctx.fillText('t=' + mat, x0 + padL + plotW - 30, H - 18);
+            ctx.fillText('t=0', x0 + padL, H - 18);
+        })();
+    }
+
+    [sCpn, sMat, sFace, sY].forEach(el => el.addEventListener('input', draw));
+    draw();
+})();
+</script>
+</body>
+</html>
